@@ -12,6 +12,23 @@ run the same thing locally without Colab.
 stops immediately if it cannot see a GPU, rather than spending eight minutes installing
 CUDA wheels a CPU runtime cannot use.
 
+### `ModuleNotFoundError: No module named 'dgl'`
+
+That error comes from the **pre-fix** version of the notebook, which imported
+`inference.utils` (and through it `dgl`) into the Colab kernel. The fixed notebook never
+imports `dgl` in the kernel at all, so if you see it you are running an old copy — a
+"Copy of diffusion.ipynb" saved in your Drive, a tab left open from before, or Colab's
+cached copy of the GitHub file. Open the current one and use a fresh runtime:
+
+```
+https://colab.research.google.com/github/IDispose/diffusion/blob/main/rf/examples/diffusion.ipynb?flush_cache=true
+```
+
+then *Runtime → Disconnect and delete runtime* before re-running the setup cell. A quick
+way to tell the two apart: the fixed setup cell is titled
+*setup **RFdiffusion** (~8 min, **GPU runtime required**)* and mentions
+`/content/rfdiff-env`.
+
 ### Why the notebook needed fixing
 
 Colab's hosted runtime is now **Python 3.13 with torch 2.11**. RFdiffusion depends on
