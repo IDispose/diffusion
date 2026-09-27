@@ -29,6 +29,16 @@ way to tell the two apart: the fixed setup cell is titled
 *setup **RFdiffusion** (~8 min, **GPU runtime required**)* and mentions
 `/content/rfdiff-env`.
 
+### The setup cell fails on the DGL install
+
+The setup cell now prints the tail of whatever the failing command wrote, so the error
+itself should be on screen. DGL is installed from an explicit wheel URL
+(`data.dgl.ai/wheels/torch-2.4/cu124/dgl-2.4.0+cu124-cp311-cp311-manylinux1_x86_64.whl`,
+350 MB) rather than via `-f .../repo.html`, with `UV_HTTP_TIMEOUT=600` for slow links and
+a fallback to the venv's own `pip` if `uv` refuses the wheel. If it still fails, check
+that the wheel URL returns 200 — that host has already dropped two other assets this
+notebook used to download.
+
 ### Why the notebook needed fixing
 
 Colab's hosted runtime is now **Python 3.13 with torch 2.11**. RFdiffusion depends on

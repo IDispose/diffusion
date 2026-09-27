@@ -36,15 +36,25 @@ command -v uv >/dev/null 2>&1 || {
 }
 
 echo "==> creating Python 3.11 venv at $ENV_DIR"
-uv venv -q --python 3.11 "$ENV_DIR"
+uv venv -q --seed --python 3.11 "$ENV_DIR"
 export VIRTUAL_ENV="$ENV_DIR"
+# the CUDA DGL wheel is 350 MB; uv's 30 s default HTTP timeout is not enough on a slow link
+export UV_HTTP_TIMEOUT=600
 pip_install() { uv pip install -q "$@"; }
 
 # DGL first, with --no-deps: its metadata asks for an unpinned torch, which resolves to
 # the newest release and breaks the ABI its compiled extensions were built against.
 echo "==> installing DGL"
 if [ "$MODE" = "cuda" ]; then
-  pip_install --no-deps "dgl==2.4.0+cu124" -f https://data.dgl.ai/wheels/torch-2.4/cu124/repo.html
+  # by direct wheel URL, not `-f .../repo.html`: data.dgl.ai is a plain directory listing
+  # with one wheel per (python, torch, cuda) combo, and resolving "dgl==2.4.0+cu124" out of
+  # it needs the installer to accept both a local version specifier and the legacy
+  # manylinux1 tag. Fall back to the venv's pip if uv will not take the wheel.
+  DGL_WHEEL=https://data.dgl.ai/wheels/torch-2.4/cu124/dgl-2.4.0%2Bcu124-cp311-cp311-manylinux1_x86_64.whl
+  pip_install --no-deps "$DGL_WHEEL" || {
+    echo "    uv could not install the DGL wheel; retrying with pip"
+    "$ENV_DIR/bin/python" -m pip install -q --no-deps "$DGL_WHEEL"
+  }
 else
   pip_install --no-deps "dgl==2.2.0"
 fi
