@@ -39,6 +39,14 @@ a fallback to the venv's own `pip` if `uv` refuses the wheel. If it still fails,
 that the wheel URL returns 200 — that host has already dropped two other assets this
 notebook used to download.
 
+### `No module named 'torch'` from the check-environment cell
+
+The Python 3.11 env exists but is empty, because an earlier setup attempt failed partway
+through and the cell then skipped the installs on the re-run. The cell now only skips them
+when `/content/rfdiff-env/.setup-complete` exists, which is written after the final
+verification passes, and it deletes any half-built env before rebuilding. Just re-run the
+setup cell; if you are on an older copy, `!rm -rf /content/rfdiff-env` first.
+
 ### Why the notebook needed fixing
 
 Colab's hosted runtime is now **Python 3.13 with torch 2.11**. RFdiffusion depends on
