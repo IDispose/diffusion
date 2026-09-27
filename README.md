@@ -39,6 +39,15 @@ a fallback to the venv's own `pip` if `uv` refuses the wheel. If it still fails,
 that the wheel URL returns 200 — that host has already dropped two other assets this
 notebook used to download.
 
+### `clip() got an unexpected keyword argument 'a_max'` in the ProteinMPNN cell
+
+ProteinMPNN itself succeeds and AlphaFold then fails: ColabDesign's bundled AlphaFold calls
+`jnp.clip(x, a_min=, a_max=)`, keywords JAX renamed to `min=`/`max=` in 0.4.27 and removed
+in 0.6, and Colab ships a much newer JAX. The setup cell now rewrites those four call sites
+in the installed `colabdesign` copy (`af/alphafold/model/modules.py` and
+`modules_multimer.py`). The patch runs on every execution of the setup cell, so re-running
+it repairs an environment built before this fix — no need to rebuild the 3.11 env.
+
 ### `No solution found ... no wheels with a matching Python version tag (cp313)`
 
 `uv` was resolving against Colab's system Python 3.13 instead of the 3.11 venv: setting
