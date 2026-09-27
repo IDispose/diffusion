@@ -39,6 +39,13 @@ a fallback to the venv's own `pip` if `uv` refuses the wheel. If it still fails,
 that the wheel URL returns 200 — that host has already dropped two other assets this
 notebook used to download.
 
+### `No solution found ... no wheels with a matching Python version tag (cp313)`
+
+`uv` was resolving against Colab's system Python 3.13 instead of the 3.11 venv: setting
+`VIRTUAL_ENV` is not reliably honoured there. Every `uv pip install` now passes
+`--python /content/rfdiff-env/bin/python` explicitly, which the environment cannot
+override.
+
 ### `No module named 'torch'` from the check-environment cell
 
 The Python 3.11 env exists but is empty, because an earlier setup attempt failed partway

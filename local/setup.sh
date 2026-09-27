@@ -37,10 +37,11 @@ command -v uv >/dev/null 2>&1 || {
 
 echo "==> creating Python 3.11 venv at $ENV_DIR"
 uv venv -q --seed --python 3.11 "$ENV_DIR"
-export VIRTUAL_ENV="$ENV_DIR"
 # the CUDA DGL wheel is 350 MB; uv's 30 s default HTTP timeout is not enough on a slow link
 export UV_HTTP_TIMEOUT=600
-pip_install() { uv pip install -q "$@"; }
+# --python targets the venv explicitly; VIRTUAL_ENV alone is not always honoured, and uv
+# then resolves against the system interpreter and rejects every wheel on its Python tag.
+pip_install() { uv pip install -q --python "$PY" "$@"; }
 
 # DGL first, with --no-deps: its metadata asks for an unpinned torch, which resolves to
 # the newest release and breaks the ABI its compiled extensions were built against.
